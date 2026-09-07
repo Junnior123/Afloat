@@ -18,23 +18,24 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Build release files
-        shell: powershell
+        shell: pwsh
         run: .\build.ps1 -SkipPreview
       - name: Test app
         if: github.event_name == 'pull_request'
-        shell: powershell
+        shell: pwsh
         run: dotnet ..\Afloat\Afloat.dll --self-test .\app-test-results.txt
       - name: Test installer
-        shell: powershell
+        shell: pwsh
         run: '& ..\Afloat-Setup-1.1.0.exe /self-test .\installer-test-results.txt'
       - name: Package portable build
-        if: github.event_name == 'release' || (github.event_name == 'push' && github.event.head_commit.message == 'Repair release assets v3')
-        shell: powershell
+        if: github.event_name == 'release' || (github.event_name == 'push' && github.event.head_commit.message == 'Repair release assets v4')
+        shell: pwsh
         run: Compress-Archive -LiteralPath ..\Afloat -DestinationPath ..\Afloat-Portable-1.1.0.zip -CompressionLevel Optimal
       - name: Upload release files
-        if: github.event_name == 'release' || (github.event_name == 'push' && github.event.head_commit.message == 'Repair release assets v3')
-        shell: powershell
+        if: github.event_name == 'release' || (github.event_name == 'push' && github.event.head_commit.message == 'Repair release assets v4')
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event.release.tag_name || 'v1.1.0' }}
         run: gh release upload $env:RELEASE_TAG ..\Afloat-Setup-1.1.0.exe ..\Afloat-Portable-1.1.0.zip --clobber --repo $env:GITHUB_REPOSITORY
+
