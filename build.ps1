@@ -20,8 +20,7 @@ if (-not $SkipPreview) {
     dotnet (Join-Path $OutputDirectory 'Afloat.dll') --render-preview (Join-Path $buildScratch 'preview.png')
     if ($LASTEXITCODE -ne 0) { throw 'Preview failed.' }
 } else {
-    dotnet (Join-Path $OutputDirectory 'Afloat.dll') --render-icon (Join-Path $buildScratch 'Afloat.ico')
-    if ($LASTEXITCODE -ne 0) { throw 'Icon generation failed.' }
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'assets/Afloat.ico') -Destination (Join-Path $buildScratch 'Afloat.ico') -Force
 }
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 & $compiler /nologo /target:winexe /optimize+ "/out:$OutputDirectory/Afloat.exe" "/win32icon:$buildScratch/Afloat.ico" /reference:System.Windows.Forms.dll (Join-Path $PSScriptRoot 'launcher/Launcher.cs')
@@ -34,4 +33,3 @@ $installerSource = Join-Path $PSScriptRoot 'installer/Installer.cs'
 if ($LASTEXITCODE -ne 0) { throw 'Installer build failed.' }
 Write-Output "Ready: $OutputDirectory/Afloat.exe"
 Write-Output "Setup: $setupPath"
-
