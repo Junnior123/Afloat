@@ -21,6 +21,13 @@ public partial class App : System.Windows.Application
         {
             int code = SelfTest.Run(e.Args[1]); Shutdown(code); return;
         }
+        if (e.Args.Length >= 2 && e.Args[0] == "--render-icon")
+        {
+            using var icon = Afloat.MainWindow.CreateTrayIcon();
+            using var iconStream = File.Create(e.Args[1]);
+            icon.Save(iconStream);
+            Shutdown(); return;
+        }
         if (e.Args.Length >= 2 && e.Args[0] == "--render-preview")
         {
             var preview = new MainWindow(true) { ShowActivated = false };
