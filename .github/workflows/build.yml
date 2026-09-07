@@ -1,0 +1,24 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build release files
+        shell: powershell
+        run: .\build.ps1
+      - name: Test app
+        shell: powershell
+        run: dotnet ..\Afloat\Afloat.dll --self-test .\app-test-results.txt
+      - name: Test installer
+        shell: powershell
+        run: '& ..\Afloat-Setup-1.1.0.exe /self-test .\installer-test-results.txt'
+
