@@ -1,4 +1,7 @@
-param([string]$OutputDirectory = (Join-Path $PSScriptRoot '../Afloat'))
+param(
+    [string]$OutputDirectory = (Join-Path $PSScriptRoot '../Afloat'),
+    [switch]$SkipPreview
+)
 $ErrorActionPreference = 'Stop'
 $buildScratch = Join-Path $PSScriptRoot '../../work/build-tools'
 New-Item -ItemType Directory -Force -Path $buildScratch, $OutputDirectory | Out-Null
@@ -13,8 +16,10 @@ dotnet restore (Join-Path $PSScriptRoot 'Afloat.csproj') --configfile (Join-Path
 if ($LASTEXITCODE -ne 0) { throw 'Restore failed.' }
 dotnet build (Join-Path $PSScriptRoot 'Afloat.csproj') -c Release --no-restore -o $OutputDirectory
 if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
-dotnet (Join-Path $OutputDirectory 'Afloat.dll') --render-preview (Join-Path $buildScratch 'preview.png')
-if ($LASTEXITCODE -ne 0) { throw 'Preview failed.' }
+if (-not $SkipPreview) {
+    dotnet (Join-Path $OutputDirectory 'Afloat.dll') --render-preview (Join-Path $buildScratch 'preview.png')
+    if ($LASTEXITCODE -ne 0) { throw 'Preview failed.' }
+}
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 & $compiler /nologo /target:winexe /optimize+ "/out:$OutputDirectory/Afloat.exe" "/win32icon:$buildScratch/Afloat.ico" /reference:System.Windows.Forms.dll (Join-Path $PSScriptRoot 'launcher/Launcher.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Launcher build failed.' }
