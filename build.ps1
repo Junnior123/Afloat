@@ -3,6 +3,11 @@ param(
     [switch]$SkipPreview
 )
 $ErrorActionPreference = 'Stop'
+$sourceDirectory = [System.IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\', '/')
+$OutputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory).TrimEnd('\', '/')
+if ([string]::Equals($sourceDirectory, $OutputDirectory, [System.StringComparison]::OrdinalIgnoreCase)) {
+    throw 'OutputDirectory must be different from the source directory.'
+}
 $buildScratch = Join-Path $PSScriptRoot '../../work/build-tools'
 New-Item -ItemType Directory -Force -Path $buildScratch, $OutputDirectory | Out-Null
 $env:DOTNET_CLI_HOME = Join-Path $buildScratch 'dotnet-home'
@@ -16,6 +21,8 @@ dotnet restore (Join-Path $PSScriptRoot 'Afloat.csproj') --configfile (Join-Path
 if ($LASTEXITCODE -ne 0) { throw 'Restore failed.' }
 dotnet build (Join-Path $PSScriptRoot 'Afloat.csproj') -c Release --no-restore -o $OutputDirectory
 if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
+$appAssembly = Join-Path $OutputDirectory 'Afloat.dll'
+if ((Get-Item -LiteralPath $appAssembly).Length -lt 30000) { throw 'Build produced an incomplete Afloat.dll.' }
 if (-not $SkipPreview) {
     dotnet (Join-Path $OutputDirectory 'Afloat.dll') --render-preview (Join-Path $buildScratch 'preview.png')
     if ($LASTEXITCODE -ne 0) { throw 'Preview failed.' }

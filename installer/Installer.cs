@@ -69,6 +69,7 @@ internal static class InstallerProgram
                 using (Stream stream = assembly.GetManifestResourceStream(item.Value))
                 {
                     if (stream == null || stream.Length == 0) throw new InvalidDataException(item.Value);
+                    if (item.Key == "Afloat.dll" && stream.Length < 30000) throw new InvalidDataException("Afloat.dll payload is incomplete");
                     using (SHA256 hash = SHA256.Create()) lines.Add("PASS: " + item.Key + " embedded · " + BitConverter.ToString(hash.ComputeHash(stream)).Replace("-", "").Substring(0, 12));
                 }
             }
@@ -261,7 +262,11 @@ internal sealed class InstallForm : Form
     {
         try
         {
-            if (launch.Checked) Process.Start(Path.Combine(InstallerProgram.InstallDirectory, "Afloat.exe"));
+            if (launch.Checked)
+            {
+                string executable = Path.Combine(InstallerProgram.InstallDirectory, "Afloat.exe");
+                Process.Start(new ProcessStartInfo(executable) { WorkingDirectory = InstallerProgram.InstallDirectory, UseShellExecute = true });
+            }
             Close();
         }
         catch (Exception ex)
@@ -338,4 +343,3 @@ internal sealed class LogoPanel : Control
     }
     protected override void Dispose(bool disposing) { if (disposing && logo != null) logo.Dispose(); base.Dispose(disposing); }
 }
-
