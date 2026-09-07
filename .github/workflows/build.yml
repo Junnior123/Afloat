@@ -19,7 +19,7 @@ jobs:
           dotnet-version: 8.0.x
       - name: Build release files
         shell: powershell
-        run: .\build.ps1
+        run: .\build.ps1 -SkipPreview
       - name: Test app
         shell: powershell
         run: dotnet ..\Afloat\Afloat.dll --self-test .\app-test-results.txt
@@ -27,14 +27,14 @@ jobs:
         shell: powershell
         run: '& ..\Afloat-Setup-1.1.0.exe /self-test .\installer-test-results.txt'
       - name: Package portable build
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || (github.event_name == 'push' && github.event.head_commit.message == 'Repair release assets')
         shell: powershell
         run: Compress-Archive -LiteralPath ..\Afloat -DestinationPath ..\Afloat-Portable-1.1.0.zip -CompressionLevel Optimal
       - name: Upload release files
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || (github.event_name == 'push' && github.event.head_commit.message == 'Repair release assets')
         shell: powershell
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || 'v1.1.0' }}
         run: gh release upload $env:RELEASE_TAG ..\Afloat-Setup-1.1.0.exe ..\Afloat-Portable-1.1.0.zip --clobber --repo $env:GITHUB_REPOSITORY
 
