@@ -2,8 +2,6 @@
 
 선택한 Windows 창을 단축키 한 번으로 항상 위에 고정하는 작은 유틸리티입니다.
 
-![Afloat](assets/Afloat-preview.png)
-
 ## 주요 기능
 
 - `Ctrl + Alt + Space`로 현재 창 고정 / 해제
